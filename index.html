@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>GrandRP Strafmaß-Generator</title>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #2a2a2a; padding: 20px; border-radius: 10px; }
+        .crime-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #444; cursor: pointer; }
+        .crime-item:hover { background: #333; }
+        .crime-item input { margin-right: 15px; }
+        .result-area { margin-top: 20px; padding: 15px; background: #111; border-radius: 5px; }
+        button { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background: #c0392b; }
+        .summary { margin-bottom: 15px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>LSPD Strafkatalog Rechner</h2>
+
+    <div id="crime-list">
+        </div>
+
+    <div class="result-area">
+        <div class="summary" id="output">Noch keine Delikte ausgewählt.</div>
+        <button onclick="copyToClipboard()">Strafmaß kopieren</button>
+    </div>
+</div>
+
+<script>
+    // Liste der Straftaten - Hier kannst du easy neue hinzufügen oder Werte ändern!
+    const crimes = [
+        { name: "Beamtenbeleidigung", fine: 5000, time: 0 },
+        { name: "Widerstand gegen die Staatsgewalt", fine: 10000, time: 15 },
+        { name: "Illegaler Waffenbesitz", fine: 25000, time: 30 },
+        { name: "Mord / Totschlag", fine: 50000, time: 60 },
+        { name: "Fahren ohne Führerschein", fine: 2500, time: 0 }
+    ];
+
+    const crimeListDiv = document.getElementById('crime-list');
+    const outputDiv = document.getElementById('output');
+
+    function renderCrimes() {
+        crimes.forEach((crime, index) => {
+            const div = document.createElement('div');
+            div.className = 'crime-item';
+            div.innerHTML = 
+                <label>
+                    <input type="checkbox" onchange="updateSummary()" data-index="${index}">
+                    ${crime.name}
+                </label>
+                <span>$${crime.fine.toLocaleString()} | ${crime.time} Min</span>
+            ;
+            crimeListDiv.appendChild(div);
+        });
+    }
+
+    function updateSummary() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        let totalFine = 0;
+        let totalTime = 0;
+        let selectedCrimes = [];
+
+        checkboxes.forEach(cb => {
+            const crime = crimes[cb.getAttribute('data-index')];
+            totalFine += crime.fine;
+            totalTime += crime.time;
+            selectedCrimes.push(crime.name);
+        });
+
+        if (selectedCrimes.length === 0) {
+            outputDiv.innerText = "Noch keine Delikte ausgewählt.";
+            return;
+        }
+
+        const text = Delikte: ${selectedCrimes.join(', ')}\nGesamtstrafe: $${totalFine.toLocaleString()}\nHaftzeit: ${totalTime} Minuten;
+        outputDiv.innerText = text;
+    }
+
+    function copyToClipboard() {
+        const text = outputDiv.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Kopiert!");
+        });
+    }
+
+    renderCrimes();
+</script>
+
+</body>
+</html>
